@@ -1,33 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter_poc/navigation/routes.dart';
-import 'package:flutter_poc/presentation/viewmodels/search_viewmodel.dart';
-import 'package:flutter_poc/data/repositories/search_repository.dart';
-import 'package:flutter_poc/domain/usecases/search_usecase.dart';
+import 'data/repositories/search_repository.dart';
+import 'presentation/screens/search_screen.dart';
+import 'services/api_service.dart';
 
 void main() {
-  runApp(const MyApp());
+  final dio = Dio();
+  final apiService = ApiService();
+  final searchRepository = SearchRepository(apiService);
+
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => SearchViewModel(searchRepository),
+        ),
+      ],
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider<SearchViewModel>(
-          create: (_) => SearchViewModel(
-            SearchRepository(Dio()),  // Pass the Dio instance here
-            SearchUseCase(),          // Pass the SearchUseCase here
-          ),
-        ),
-      ],
-      child: const MaterialApp(
-        debugShowCheckedModeBanner: false,
-        initialRoute: Routes.searchSuggestion,
-        onGenerateRoute: Routes.generateRoute,
+    return MaterialApp(
+      home: SearchScreen(
+        onItemClick: () {
+          // Handle item click
+        },
       ),
     );
   }

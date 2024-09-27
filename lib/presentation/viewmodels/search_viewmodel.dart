@@ -1,54 +1,63 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_poc/data/models/search_suggestion.dart';
-import 'package:flutter_poc/data/repositories/search_repository.dart';
-import 'package:flutter_poc/domain/usecases/search_usecase.dart';
 
+import '../../data/models/search_suggestion.dart';
+import '../../data/repositories/search_repository.dart';
 import '../screens/search_screen.dart';
 
 class SearchViewModel extends ChangeNotifier {
-  final SearchRepository searchRepository;
-  final SearchUseCase searchUseCase;
-
   String searchText = '';
   bool isLoading = false;
   List<Product> filteredProductsList = [];
-  List<SuggestionWithType> suggestions = [];
-  String error = '';
   bool isThresholdMet = false;
 
-  SearchViewModel(this.searchRepository, this.searchUseCase);
+  final SearchRepository searchRepository;
+
+  SearchViewModel(this.searchRepository);
 
   void onSearchTextChange(String text) {
     searchText = text;
-    // You can add logic for filtering products locally or call the API here.
+
+    if (text.length > 3) {
+      fetchSearchResults();  // Trigger API when search text length exceeds 3 characters
+      isThresholdMet = true;
+    } else {
+      isThresholdMet = false;
+      filteredProductsList = [];  // Clear the product list when text is less than 4 characters
+    }
+    
     notifyListeners();
+  }
+
+  Future<void> fetchSearchResults() async {
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      final searchResult = await searchRepository.fetchSearchResult(searchText, 'product');
+      filteredProductsList = await processSearchResult(searchResult);
+    } catch (e) {
+      // Handle error
+      print('Error fetching search results: $e');
+      filteredProductsList = [];  // Clear the list in case of error
+    }
+
+    isLoading = false;
+    notifyListeners();
+  }
+
+  Future<List<Product>> processSearchResult(SearchSuggestion searchResult) async {
+    final suggestionWithType = searchResult.responseData?.suggestionWithType ?? [];
+    return suggestionWithType.map((item) => Product(item.text)).toList();
   }
 
   void clearSearchText() {
     searchText = '';
-    filteredProductsList = [];
+    filteredProductsList = [];  // Clear the list when search text is cleared
     notifyListeners();
   }
 
   void setSearchText(String text) {
     searchText = text;
     notifyListeners();
-  }
-
-  Future<void> getSearchResults(String searchText, String type) async {
-    try {
-      isLoading = true;
-      notifyListeners();
-
-      final searchResult = await searchRepository.getSearchResult(searchText, type);
-      suggestions = await searchUseCase.processSearchResult(searchResult);
-
-      isLoading = false;
-      notifyListeners();
-    } catch (e) {
-      isLoading = false;
-      error = e.toString();
-      notifyListeners();
-    }
   }
 }

@@ -1,22 +1,30 @@
-import 'package:dio/dio.dart';
-import 'package:flutter_poc/data/models/search_suggestion.dart';
+import '../../services/api_service.dart';
+import '../models/search_suggestion.dart';
 
 class SearchRepository {
-  final Dio dio;
+  final ApiService apiService;
 
-  SearchRepository(this.dio);
+  SearchRepository(this.apiService);
 
-  Future<SearchSuggestion> getSearchResult(String searchText, String type) async {
+  Future<SearchSuggestion> fetchSearchResult(String searchText, String type) async {
     try {
-      final response = await dio.get('https://api.example.com/searchResult', queryParameters: {
-        'searchString': searchText,
-        'elasticSearchType': type,
-        'sizeCount': 20,
-        'page': 1
-      });
-      return SearchSuggestion.fromJson(response.data);
+      final response = await apiService.getSearchResults(
+        searchText: searchText,
+        type: type,
+        warehouseId: 10, // Fixed as in the original Kotlin example
+        sizeCount: 20,    // Fixed size count from Kotlin example
+        variantId: 11,    // Fixed variant id
+        page: 1,          // First page
+        isMultiSearch: false, // Fixed boolean
+      );
+
+      if (response.statusCode == 200) {
+        return SearchSuggestion.fromJson(response.data);
+      } else {
+        throw Exception('Failed to fetch search result');
+      }
     } catch (e) {
-      throw Exception('Failed to fetch search result');
+      throw Exception('Failed to fetch search result: $e');
     }
   }
 }

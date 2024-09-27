@@ -1,4 +1,7 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_poc/data/repositories/search_repository.dart';
+import 'package:flutter_poc/services/api_service.dart';
 import 'package:provider/provider.dart';
 
 
@@ -13,7 +16,7 @@ class SearchScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => SearchViewModel(),
+      create: (_) => SearchViewModel(SearchRepository(Dio() as ApiService)), // Pass the SearchRepository instance
       child: Scaffold(
         backgroundColor: Colors.white,
         body: Padding(
@@ -24,7 +27,6 @@ class SearchScreen extends StatelessWidget {
     );
   }
 }
-
 
 class SearchContent extends StatelessWidget {
   final VoidCallback onItemClick;
@@ -196,6 +198,8 @@ class SearchViewModel extends ChangeNotifier {
   bool isLoading = false;
   List<Product> filteredProductsList = [];
   bool isThresholdMet = false;
+
+  SearchViewModel(SearchRepository searchRepository);
 
   void onSearchTextChange(String text) {
     searchText = text;
