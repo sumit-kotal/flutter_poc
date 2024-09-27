@@ -7,22 +7,25 @@ import 'package:flutter_poc/data/repositories/search_repository.dart';
 import 'package:flutter_poc/domain/usecases/search_usecase.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(
+        ChangeNotifierProvider<SearchViewModel>(
           create: (_) => SearchViewModel(
-            SearchRepository(Dio()),
-            SearchUseCase(),
+            SearchRepository(Dio()),  // Pass the Dio instance here
+            SearchUseCase(),          // Pass the SearchUseCase here
           ),
         ),
       ],
-      child: MaterialApp(
+      child: const MaterialApp(
+        debugShowCheckedModeBanner: false,
         initialRoute: Routes.searchSuggestion,
         onGenerateRoute: Routes.generateRoute,
       ),

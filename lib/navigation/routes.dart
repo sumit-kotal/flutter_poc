@@ -9,12 +9,14 @@ class Routes {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case searchSuggestion:
-        return MaterialPageRoute(builder: (_) => SearchScreen());
+        return MaterialPageRoute(builder: (_) => SearchScreen(onItemClick: () {}));
       // case searchResult:
       //   final args = settings.arguments as String;
       //   return MaterialPageRoute(builder: (_) => SearchResultScreen(searchText: args));
       default:
-        return MaterialPageRoute(builder: (_) => SearchScreen());
+        return MaterialPageRoute(builder: (_) => SearchScreen(onItemClick: () {}));
     }
   }
 }
+
+
